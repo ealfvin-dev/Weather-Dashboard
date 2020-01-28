@@ -1,0 +1,72 @@
+html {
+    padding-right: 1%;
+    padding-left: 1%;
+}
+
+.banner {
+    background-color: rgb(50, 50, 50);
+    padding-top: 0.6%;
+    padding-bottom: 1%;
+}
+
+h1 {
+    color: white;
+    width: 50%;
+    text-align: center;
+    margin: auto;
+}
+
+.container-full {
+    padding-right: 1%;
+    padding-left: 1%;
+}
+
+.col-lg-4 {
+    background-color: rgb(245, 245, 245);
+    padding-top: 1%;
+}
+
+#StoredCities {
+    background-color: white;
+    border-left-style: solid;
+    border-right-style: solid;
+    border-top-style: solid;
+    border-bottom-style: solid;
+    border-left-color:  rgb(215, 215, 215);
+    border-right-color:  rgb(215, 215, 215);
+    border-top-color:  rgb(215, 215, 215);
+    border-bottom-color:  rgb(215, 215, 215);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 1px;
+}
+
+#CurrentWeather {
+    margin-top: 2%;
+    margin-bottom: 2%;
+    padding: 3%;
+    border-style: solid;
+    border-width: 2px;
+    border-color: rgb(215, 215, 215);
+}
+
+#City {
+    visibility: hidden;
+}
+
+#Temperature {
+    visibility: hidden;
+}
+
+#Humidity {
+    visibility: hidden;
+}
+
+#Wind {
+    visibility: hidden;
+}
+
+#UV {
+    visibility: hidden;
+}
