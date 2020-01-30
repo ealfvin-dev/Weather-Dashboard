@@ -24,6 +24,7 @@ $(document).ready(function() {
             var currentHumidity = response.main.humidity;
             var currentWind = response.wind.speed;
 
+            //Write response results onto page
             $("#Temperature").text("Temperature: " + currentTemp + " " + String.fromCharCode(176) + "F");
             $("#Humidity").text("Humidity: " + currentHumidity + " %");
             $("#Wind").text("Wind speed: " + currentWind + " MPH");
@@ -44,6 +45,7 @@ $(document).ready(function() {
                 var uvIndex = uvResponse.value;
                 $("#UVvalue").text(uvIndex);
 
+                //Set UV-Index background-color and text color based on value
                 var color = "green";
                 var textColor = "white";
                 if (uvIndex > 2) {
@@ -63,6 +65,44 @@ $(document).ready(function() {
                 $("#UVvalue").css("color", textColor);
                 $("#UV").css("visibility", "visible");
             });
+
+            //Get 5-day forecast if valid search
+            var cityID = response.id;
+            var fiveDayURL = "https://api.openweathermap.org/data/2.5/forecast?APPID=10a0646374889cca48ebde2c7c4b3dcd&id=" + cityID;
+
+            $.ajax({
+                method: "GET",
+                url: fiveDayURL
+            }).then(function(fiveDayResponse) {
+                $("#FiveDayCards").empty();
+
+                //Get forecast at noon each day and make a weather div
+                for(var i = 0; i < 40; i++) {
+                    var timeStamp = fiveDayResponse.list[i].dt_txt;
+                    if (timeStamp.split(" ")[1] === "12:00:00") {
+                        var newDay = $("<div>");
+
+                        var date = $("<h5>");
+                        var icon = $("<div>")
+                        var temp = $("<p>");
+                        var humidity = $("<p>");
+
+                        date.text(timeStamp.split(" ")[0]);
+                        temp.text("Temp: " + Math.round((fiveDayResponse.list[i].main.temp - 273.15) * (9/5) + 32) + String.fromCharCode(176) + "F");
+                        humidity.text("Humidity: " + fiveDayResponse.list[i].main.humidity + " %");
+
+                        newDay.append(date);
+                        newDay.append(temp);
+                        newDay.append(humidity);
+
+                        newDay.css("background-color", "lightblue");
+
+                        newDay.attr("class", "newDay");
+
+                        $("#FiveDayCards").append(newDay);
+                    }
+                }
+            });
         }
 
         function onError(a, b, c) {
@@ -72,6 +112,8 @@ $(document).ready(function() {
             $("#Humidity").css("visibility", "hidden");
             $("#Wind").css("visibility", "hidden");
             $("#UV").css("visibility", "hidden");
+
+            $("#FiveDayCards").empty();
         }
     }
 });

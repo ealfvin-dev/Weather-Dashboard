@@ -74,3 +74,14 @@ h1 {
 #UVtag, #UVvalue {
     padding: 0.5%;
 }
+
+.newDay {
+    width: 18%;
+    margin: 1%;
+    padding: 1%;
+    float: left;
+}
+
+h5 {
+    font-weight: bold;
+}
