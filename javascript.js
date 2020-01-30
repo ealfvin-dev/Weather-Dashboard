@@ -31,22 +31,47 @@ $(document).ready(function() {
             $("#Temperature").css("visibility", "visible");
             $("#Humidity").css("visibility", "visible");
             $("#Wind").css("visibility", "visible");
+
+            //Get UV index if valid search
+            var lat = response.coord.lat;
+            var long = response.coord.lon;
+            uvURL = "https://api.openweathermap.org/data/2.5/uvi?APPID=10a0646374889cca48ebde2c7c4b3dcd&lat=" + lat + "&lon=" + long;
+
+            $.ajax({
+                method: "GET",
+                url: uvURL
+            }).then(function(uvResponse) {
+                var uvIndex = uvResponse.value;
+                $("#UVvalue").text(uvIndex);
+
+                var color = "green";
+                var textColor = "white";
+                if (uvIndex > 2) {
+                    color = 'yellow';
+                    textColor = "black";
+                }
+                if (uvIndex > 5) {
+                    color = "orange";
+                    textColor = "black";
+                }
+                if (uvIndex > 7) {
+                    color = "red";
+                    textColor = "white";
+                }
+
+                $("#UVvalue").css("background-color", color);
+                $("#UVvalue").css("color", textColor);
+                $("#UV").css("visibility", "visible");
+            });
         }
 
         function onError(a, b, c) {
             $("#City").text(city + " - " + "City Not Found");
+
             $("#Temperature").css("visibility", "hidden");
             $("#Humidity").css("visibility", "hidden");
             $("#Wind").css("visibility", "hidden");
-        }
-
-        $.ajax({
-            method: "GET",
-            url:  "https://api.openweathermap.org/data/2.5/uvi/forecast?lat=44&lon=-93&APPID=10a0646374889cca48ebde2c7c4b3dcd"
-        }).then(renderUV);
-
-        function renderUV(response) {
-            //console.log(response);
+            $("#UV").css("visibility", "hidden");
         }
     }
 });
