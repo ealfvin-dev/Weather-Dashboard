@@ -7,9 +7,6 @@ $(document).ready(function() {
         var date = moment().format('MMM DD YYYY');
 
         var city = $("#inlineFormInput").val();
-        $("#City").text(city + " - " + date);
-
-        $("#City").css("visibility", "visible");
 
         var queryURL = "https://api.openweathermap.org/data/2.5/weather?APPID=10a0646374889cca48ebde2c7c4b3dcd&q=" + city;
 
@@ -20,23 +17,35 @@ $(document).ready(function() {
         }).then(render);
 
         function render(response) {
-            var currentTemp = Math.round((response.main.temp - 273.15) * (9/5) + 32);
+            var currentTemp = Math.round(response.main.temp);
             var currentHumidity = response.main.humidity;
             var currentWind = response.wind.speed;
 
             //Write response results onto page
+            $("#City").text(city + " - " + date);
             $("#Temperature").text("Temperature: " + currentTemp + " " + String.fromCharCode(176) + "F");
             $("#Humidity").text("Humidity: " + currentHumidity + " %");
             $("#Wind").text("Wind speed: " + currentWind + " MPH");
 
+            $("#City").css("visibility", "visible");
             $("#Temperature").css("visibility", "visible");
             $("#Humidity").css("visibility", "visible");
             $("#Wind").css("visibility", "visible");
 
+            $("#WeatherIconDiv").empty();
+            var icon = $("<img>");
+
+            iconName = response.weather[0].icon;
+            iconURL = "http://openweathermap.org/img/wn/" + iconName + "@2x.png";
+
+            icon.attr("src", iconURL);
+            icon.attr("width", "50%");
+            $("#WeatherIconDiv").append(icon);
+
             //Get UV index if valid search
             var lat = response.coord.lat;
             var long = response.coord.lon;
-            uvURL = "https://api.openweathermap.org/data/2.5/uvi?APPID=10a0646374889cca48ebde2c7c4b3dcd&lat=" + lat + "&lon=" + long;
+            uvURL = "https://api.openweathermap.org/data/2.5/uvi?APPID=10a0646374889cca48ebde2c7c4b3dcd&units=imperial&lat=" + lat + "&lon=" + long;
 
             $.ajax({
                 method: "GET",
@@ -68,27 +77,30 @@ $(document).ready(function() {
 
             //Get 5-day forecast if valid search
             var cityID = response.id;
-            var fiveDayURL = "https://api.openweathermap.org/data/2.5/forecast?APPID=10a0646374889cca48ebde2c7c4b3dcd&id=" + cityID;
+            var fiveDayURL = "https://api.openweathermap.org/data/2.5/forecast?APPID=10a0646374889cca48ebde2c7c4b3dcd&units=imperial&id=" + cityID;
 
             $.ajax({
                 method: "GET",
                 url: fiveDayURL
             }).then(function(fiveDayResponse) {
                 $("#FiveDayCards").empty();
+                console.log(fiveDayResponse);
 
                 //Get forecast at noon each day and make a weather div
+
+                var UTCoffset = fiveDayResponse.city.timezone / (60*60);  //hours
+
                 for(var i = 0; i < 40; i++) {
                     var timeStamp = fiveDayResponse.list[i].dt_txt;
-                    if (timeStamp.split(" ")[1] === "12:00:00") {
+                    if (timeStamp.split(" ")[1] === (12 - UTCoffset) + ":00:00") {
                         var newDay = $("<div>");
 
                         var date = $("<h5>");
-                        var icon = $("<div>")
                         var temp = $("<p>");
                         var humidity = $("<p>");
 
                         date.text(timeStamp.split(" ")[0]);
-                        temp.text("Temp: " + Math.round((fiveDayResponse.list[i].main.temp - 273.15) * (9/5) + 32) + String.fromCharCode(176) + "F");
+                        temp.text("Temp: " + Math.round(fiveDayResponse.list[i].main.temp) + " " + String.fromCharCode(176) + "F");
                         humidity.text("Humidity: " + fiveDayResponse.list[i].main.humidity + " %");
 
                         newDay.append(date);
@@ -96,7 +108,6 @@ $(document).ready(function() {
                         newDay.append(humidity);
 
                         newDay.css("background-color", "lightblue");
-
                         newDay.attr("class", "newDay");
 
                         $("#FiveDayCards").append(newDay);
@@ -112,6 +123,7 @@ $(document).ready(function() {
             $("#Humidity").css("visibility", "hidden");
             $("#Wind").css("visibility", "hidden");
             $("#UV").css("visibility", "hidden");
+            $("#WeatherIconDiv").empty();
 
             $("#FiveDayCards").empty();
         }

@@ -71,6 +71,10 @@ h1 {
     visibility: hidden;
 }
 
+#WeatherIcon {
+    visibility: visible;
+}
+
 #UVtag, #UVvalue {
     padding: 0.5%;
 }
@@ -85,3 +89,17 @@ h1 {
 h5 {
     font-weight: bold;
 }
+
+h3 {
+    float: left;
+}
+
+#WeatherIconDiv {
+    float: left;
+}
+
+.clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
+  }
