@@ -98,6 +98,14 @@ h3 {
     float: left;
 }
 
+.cityDiv {
+    padding-top: 2%;
+    padding-bottom: 2%;
+    border-width: 1pt;
+    border-color: lightgrey;
+    border-style: solid;
+}
+
 .clearfix::after {
     content: "";
     clear: both;

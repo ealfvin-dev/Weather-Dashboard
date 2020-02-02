@@ -8,7 +8,35 @@ $(document).ready(function() {
 
         var city = $("#inlineFormInput").val();
 
-        var queryURL = "https://api.openweathermap.org/data/2.5/weather?APPID=10a0646374889cca48ebde2c7c4b3dcd&q=" + city;
+        //Add searched item to local storage if not in already
+        if(JSON.parse(localStorage.getItem("cities")) === null) {
+            var cities = {[city]: 1};
+            localStorage.setItem("cities", JSON.stringify(cities));
+        }
+        else if(JSON.parse(localStorage.getItem("cities"))[city] != 1) {
+            var cities = JSON.parse(localStorage.getItem("cities"));
+            cities[city] = 1;
+            localStorage.setItem("cities", JSON.stringify(cities));
+        }
+        else {
+            var cities = JSON.parse(localStorage.getItem("cities"));
+        }
+
+        //Render stored cities to the page after search
+        function renderCities() {
+            $("#StoredCities").empty();
+
+            for(var storedCity in cities) {
+                var cityDiv = $("<div>");
+                cityDiv.attr("class", "cityDiv");
+                cityDiv.text(storedCity);
+
+                $("#StoredCities").append(cityDiv);
+            }
+        }
+        renderCities();
+
+        var queryURL = "https://api.openweathermap.org/data/2.5/weather?APPID=10a0646374889cca48ebde2c7c4b3dcd&units=imperial&q=" + city;
 
         $.ajax({
             method: "GET",
@@ -35,8 +63,8 @@ $(document).ready(function() {
             $("#WeatherIconDiv").empty();
             var icon = $("<img>");
 
-            iconName = response.weather[0].icon;
-            iconURL = "http://openweathermap.org/img/wn/" + iconName + "@2x.png";
+            var iconName = response.weather[0].icon;
+            var iconURL = "http://openweathermap.org/img/wn/" + iconName + "@2x.png";
 
             icon.attr("src", iconURL);
             icon.attr("width", "50%");
@@ -45,7 +73,7 @@ $(document).ready(function() {
             //Get UV index if valid search
             var lat = response.coord.lat;
             var long = response.coord.lon;
-            uvURL = "https://api.openweathermap.org/data/2.5/uvi?APPID=10a0646374889cca48ebde2c7c4b3dcd&units=imperial&lat=" + lat + "&lon=" + long;
+            uvURL = "https://api.openweathermap.org/data/2.5/uvi?APPID=10a0646374889cca48ebde2c7c4b3dcd&lat=" + lat + "&lon=" + long;
 
             $.ajax({
                 method: "GET",
@@ -88,7 +116,7 @@ $(document).ready(function() {
 
                 //Get forecast at noon each day and make a weather div
 
-                var UTCoffset = fiveDayResponse.city.timezone / (60*60);  //hours
+                var UTCoffset = fiveDayResponse.city.timezone / (60*60); //hours
 
                 for(var i = 0; i < 40; i++) {
                     var timeStamp = fiveDayResponse.list[i].dt_txt;
@@ -96,14 +124,23 @@ $(document).ready(function() {
                         var newDay = $("<div>");
 
                         var date = $("<h5>");
+                        var icon = $("<img>");
                         var temp = $("<p>");
                         var humidity = $("<p>");
 
                         date.text(timeStamp.split(" ")[0]);
+
+                        var iconName = fiveDayResponse.list[i].weather[0].icon;
+                        var iconURL = "http://openweathermap.org/img/wn/" + iconName + "@2x.png";
+
+                        icon.attr("src", iconURL);
+                        icon.attr("width", "35%");
+
                         temp.text("Temp: " + Math.round(fiveDayResponse.list[i].main.temp) + " " + String.fromCharCode(176) + "F");
                         humidity.text("Humidity: " + fiveDayResponse.list[i].main.humidity + " %");
 
                         newDay.append(date);
+                        newDay.append(icon);
                         newDay.append(temp);
                         newDay.append(humidity);
 
