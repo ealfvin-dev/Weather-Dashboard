@@ -1,4 +1,25 @@
 $(document).ready(function() {
+    //Render cities stored in local storage
+    if(JSON.parse(localStorage.getItem("cities")) != null) {
+        var cities = JSON.parse(localStorage.getItem("cities"));
+        renderCities(cities);
+    }
+
+    function renderCities(cityObject) {
+        $("#StoredCities").empty();
+
+        for(var storedCity in cityObject) {
+            var cityDiv = $("<div>");
+            cityDiv.attr("class", "cityDiv");
+            cityDiv.attr("data-stored", "1");
+            cityDiv.text(storedCity);
+
+            $("#StoredCities").append(cityDiv);
+        }
+    }
+    //Add event listener to stored cities div
+    $("#StoredCities").on("click", search);
+
     var searchButton = $("#SearchButton");
 
     searchButton.on("click", search);
@@ -6,9 +27,19 @@ $(document).ready(function() {
     function search(event){
         var date = moment().format('MMM DD YYYY');
 
-        var city = $("#inlineFormInput").val();
+        //Get city name from stored element or search bar
+        if($(event.target).attr("data-stored") === "1") {
+            var city = $(event.target).text();
+            console.log(city);
+        }
+        else if($(event.target).text() === "Search") {
+            var city = $("#inlineFormInput").val();
+        }
+        else {
+            return;
+        }
 
-        //Add searched item to local storage if not in already
+        //Add searched item to local storage if not in already and render
         if(JSON.parse(localStorage.getItem("cities")) === null) {
             var cities = {[city]: 1};
             localStorage.setItem("cities", JSON.stringify(cities));
@@ -22,19 +53,7 @@ $(document).ready(function() {
             var cities = JSON.parse(localStorage.getItem("cities"));
         }
 
-        //Render stored cities to the page after search
-        function renderCities() {
-            $("#StoredCities").empty();
-
-            for(var storedCity in cities) {
-                var cityDiv = $("<div>");
-                cityDiv.attr("class", "cityDiv");
-                cityDiv.text(storedCity);
-
-                $("#StoredCities").append(cityDiv);
-            }
-        }
-        renderCities();
+        renderCities(cities);
 
         var queryURL = "https://api.openweathermap.org/data/2.5/weather?APPID=10a0646374889cca48ebde2c7c4b3dcd&units=imperial&q=" + city;
 
@@ -42,9 +61,9 @@ $(document).ready(function() {
             method: "GET",
             url: queryURL,
             error: onError
-        }).then(render);
+        }).then(renderWeather);
 
-        function render(response) {
+        function renderWeather(response) {
             var currentTemp = Math.round(response.main.temp);
             var currentHumidity = response.main.humidity;
             var currentWind = response.wind.speed;
@@ -70,7 +89,7 @@ $(document).ready(function() {
             icon.attr("width", "50%");
             $("#WeatherIconDiv").append(icon);
 
-            //Get UV index if valid search
+            //Get UV index if valid city search
             var lat = response.coord.lat;
             var long = response.coord.lon;
             uvURL = "https://api.openweathermap.org/data/2.5/uvi?APPID=10a0646374889cca48ebde2c7c4b3dcd&lat=" + lat + "&lon=" + long;
@@ -103,7 +122,7 @@ $(document).ready(function() {
                 $("#UV").css("visibility", "visible");
             });
 
-            //Get 5-day forecast if valid search
+            //Get 5-day forecast if valid city search
             var cityID = response.id;
             var fiveDayURL = "https://api.openweathermap.org/data/2.5/forecast?APPID=10a0646374889cca48ebde2c7c4b3dcd&units=imperial&id=" + cityID;
 
@@ -114,13 +133,11 @@ $(document).ready(function() {
                 $("#FiveDayCards").empty();
                 console.log(fiveDayResponse);
 
-                //Get forecast at noon each day and make a weather div
-
-                var UTCoffset = fiveDayResponse.city.timezone / (60*60); //hours
+                //Get forecast at 12:00:00 (UTC) each day and make a weather div
 
                 for(var i = 0; i < 40; i++) {
                     var timeStamp = fiveDayResponse.list[i].dt_txt;
-                    if (timeStamp.split(" ")[1] === (12 - UTCoffset) + ":00:00") {
+                    if (timeStamp.split(" ")[1] === "12:00:00") {
                         var newDay = $("<div>");
 
                         var date = $("<h5>");
