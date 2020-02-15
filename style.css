@@ -106,6 +106,12 @@ h3 {
     border-style: solid;
 }
 
+#GitHub {
+    position: fixed;
+    bottom: 2%;
+    left: 2%;
+}
+
 .clearfix::after {
     content: "";
     clear: both;
